@@ -50,6 +50,7 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.ValueFactory;
 import javax.jcr.security.AccessControlEntry;
+import javax.jcr.security.AccessControlException;
 import javax.jcr.security.AccessControlList;
 import javax.jcr.security.AccessControlManager;
 import javax.jcr.security.AccessControlPolicy;
@@ -74,7 +75,7 @@ public class CreateContentPoolServletTest {
   private AccessControlManager accessControlManager;
   @Mock
   private Privilege allPrivilege;
-  @Mock
+  
   private AccessControlList accessControlList;
   @Mock
   private ValueFactory valueFactory;
@@ -155,11 +156,34 @@ public class CreateContentPoolServletTest {
     Mockito.when(valueFactory.createBinary(Mockito.any(InputStream.class))).thenReturn(binary);
     
     // access control utils
+    final AccessControlEntry[] ace = new AccessControlEntry[0];
+    accessControlList = new AccessControlList() {
+
+      // Add an "addEntry" method so AccessControlUtil can execute something.
+      // This method doesn't do anything useful.
+      public boolean addEntry(Principal principal, Privilege[] privileges, boolean isAllow) throws AccessControlException { 
+        return true;
+      }
+      
+      public void removeAccessControlEntry(AccessControlEntry ace)
+          throws AccessControlException, RepositoryException {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      public AccessControlEntry[] getAccessControlEntries() throws RepositoryException {
+        return ace;
+      }
+      
+      public boolean addAccessControlEntry(Principal principal, Privilege[] privileges)
+          throws AccessControlException, RepositoryException {
+        // TODO Auto-generated method stub
+        return false;
+      }
+    };
     Mockito.when(accessControlManager.privilegeFromName(Mockito.anyString())).thenReturn(allPrivilege);
     AccessControlPolicy[] acp = new AccessControlPolicy[] {accessControlList};
     Mockito.when(accessControlManager.getPolicies(Mockito.anyString())).thenReturn(acp);
-    AccessControlEntry[] ace = new AccessControlEntry[0];
-    Mockito.when(accessControlList.getAccessControlEntries()).thenReturn(ace);
     
     // saving
     Mockito.when(adminSession.hasPendingChanges()).thenReturn(true);
