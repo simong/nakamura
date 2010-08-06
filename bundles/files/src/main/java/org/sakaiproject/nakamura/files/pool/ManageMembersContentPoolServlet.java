@@ -17,12 +17,16 @@
  */
 package org.sakaiproject.nakamura.files.pool;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 import static javax.jcr.security.Privilege.JCR_ALL;
 import static javax.jcr.security.Privilege.JCR_READ;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.apache.sling.jcr.base.util.AccessControlUtil.replaceAccessControlEntry;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_NODENAME;
+
+import com.google.common.collect.Lists;
 
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -44,15 +48,15 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.security.AccessControlEntry;
-import javax.jcr.security.AccessControlList;
+import javax.jcr.Value;
+import javax.jcr.ValueFactory;
 import javax.jcr.security.AccessControlManager;
-import javax.jcr.security.AccessControlPolicy;
 import javax.jcr.security.Privilege;
 import javax.servlet.ServletException;
 
@@ -83,72 +87,27 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
     try {
       // Get hold of the actual file.
       Node node = request.getResource().adaptTo(Node.class);
+      Session session = node.getSession();
 
-      // Get hold of an access manager to retrieve the list of ACLs with.
-      Session session = request.getResourceResolver().adaptTo(Session.class);
-      AccessControlManager acm = AccessControlUtil.getAccessControlManager(session);
-
-      // Get a list of all the entries.
-      AccessControlPolicy[] policies = acm.getEffectivePolicies(node.getPath());
-      AccessControlEntry[] entries = null;
-      for (AccessControlPolicy policy : policies) {
-        if (policy instanceof AccessControlList) {
-          entries = ((AccessControlList) policy).getAccessControlEntries();
-
-          // We're only interested on the entries on this node.
-          // These are always in the first ACL
-          break;
-        }
-      }
-
-      if (entries == null) {
-        response.sendError(SC_INTERNAL_SERVER_ERROR, "Could not lookup ACL list.");
-        return;
-      }
-
-      Set<String> managers = new HashSet<String>();
-      Set<String> viewers = new HashSet<String>();
-
-      // Loop over all the entries.
-      for (AccessControlEntry ace : entries) {
-
-        // We only need to check granted entries.
-        if (AccessControlUtil.isAllow(ace)) {
-          boolean isManager = false;
-          boolean isViewer = false;
-
-          // We were granted "something". Figure out which one and depending on that
-          // privilege this user is a manager or a viewer.
-          for (Privilege p : ace.getPrivileges()) {
-            if (p.getName().equals("jcr:all")) {
-              isManager = true;
-            } else if (p.getName().equals("jcr:read")) {
-              isViewer = true;
-            }
-          }
-
-          // Add the user to one of the sets.
-          if (isManager) {
-            managers.add(ace.getPrincipal().getName());
-          } else if (isViewer) {
-            viewers.add(ace.getPrincipal().getName());
-          }
-        }
-      }
+      // Get hold of the members node that is under the file.
+      // This node contains a list of managers and viewers.
+      Node membersNode = node.getNode(POOLED_CONTENT_MEMBERS_NODENAME);
+      Value[] managers = membersNode.getProperty("sakai:managers").getValues();
+      Value[] viewers = membersNode.getProperty("sakai:viewers").getValues();
 
       // Loop over the sets and output it.
       ExtendedJSONWriter writer = new ExtendedJSONWriter(response.getWriter());
       writer.object();
       writer.key("managers");
       writer.array();
-      for (String manager : managers) {
-        PersonalUtils.writeCompactUserInfo(session, manager, writer);
+      for (Value manager : managers) {
+        PersonalUtils.writeCompactUserInfo(session, manager.getString(), writer);
       }
       writer.endArray();
       writer.key("viewers");
       writer.array();
-      for (String viewer : viewers) {
-        PersonalUtils.writeCompactUserInfo(session, viewer, writer);
+      for (Value viewer : viewers) {
+        PersonalUtils.writeCompactUserInfo(session, viewer.getString(), writer);
       }
       writer.endArray();
       writer.endObject();
@@ -181,9 +140,12 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
 
     Session adminSession = null;
     try {
+      // Get the node.
+      Node node = request.getResource().adaptTo(Node.class);
+
       // Grab the principal manager for THIS user his session.
       // It is possible we can't look up certain groups.
-      Session session = request.getResourceResolver().adaptTo(Session.class);
+      Session session = node.getSession();
       PrincipalManager pm = AccessControlUtil.getPrincipalManager(session);
 
       // The privileges for the managers and viewers.
@@ -191,30 +153,31 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
       String[] managerPrivs = new String[] { JCR_ALL };
       String[] viewerPrivs = new String[] { JCR_READ };
 
-      // Get the node.
-      Node node = request.getResource().adaptTo(Node.class);
-
       // We need an admin session because we might only have READ access on this node.
       // Yes, that is sufficient to share a file with somebody else.
       adminSession = slingRepository.loginAdministrative(null);
 
       // If you have READ access than you can give other people read as well.
-      manipulateACL(request, adminSession, node.getPath(), viewerPrivs, pm, "viewer");
+      manipulateACL(request, adminSession, node, viewerPrivs, pm, ":viewer",
+          "sakai:viewers");
 
       // Only managers can make other people managers, so we need to do some checks.
       AccessControlManager acm = AccessControlUtil.getAccessControlManager(session);
       Privilege allPriv = acm.privilegeFromName(JCR_ALL);
       if (acm.hasPrivileges(node.getPath(), new Privilege[] { allPriv })) {
-        manipulateACL(request, adminSession, node.getPath(), managerPrivs, pm, "manager");
+        manipulateACL(request, adminSession, node, managerPrivs, pm, ":manager",
+            "sakai:managers");
       }
 
       // Persist any changes.
       if (adminSession.hasPendingChanges()) {
         adminSession.save();
       }
+      response.setStatus(SC_OK);
     } catch (RepositoryException e) {
       LOGGER
           .error("Could not set some permissions on '" + request.getPathInfo() + "'", e);
+      response.sendError(SC_INTERNAL_SERVER_ERROR, "Could not set permissions.");
     } finally {
       if (adminSession != null) {
         adminSession.logout();
@@ -250,7 +213,7 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
    * @throws RepositoryException
    */
   protected void manipulateACL(SlingHttpServletRequest request, Session session,
-      String path, String[] privilege, PrincipalManager pm, String key)
+      Node fileNode, String[] privilege, PrincipalManager pm, String key, String property)
       throws RepositoryException {
 
     // Get all the IDs of the principals that should be added and removed from the
@@ -259,6 +222,12 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
     Set<Principal> toAddSet = new HashSet<Principal>();
     String[] toDelete = request.getParameterValues(key + "@Delete");
     Set<Principal> toDeleteSet = new HashSet<Principal>();
+    String path = fileNode.getPath();
+
+    // Get the IDs that are set on the members node.
+    Node membersNode = fileNode.getNode(POOLED_CONTENT_MEMBERS_NODENAME);
+    Value[] vals = membersNode.getProperty(property).getValues();
+    List<Value> newValues = Lists.newArrayList(vals);
 
     // Resolve the principals to IDs.
     resolveNames(pm, toAdd, toAddSet);
@@ -267,14 +236,65 @@ public class ManageMembersContentPoolServlet extends SlingAllMethodsServlet {
     // Give the privileges to the set that should be added.
     for (Principal principal : toAddSet) {
       replaceAccessControlEntry(session, path, principal, privilege, null, null, null);
+      addValue(principal.getName(), newValues, session.getValueFactory());
     }
 
     // Remove the privileges for the people that should be
     // TODO Maybe remove the entire entry instead of just denying the privilege?
     for (Principal principal : toDeleteSet) {
       replaceAccessControlEntry(session, path, principal, null, privilege, null, null);
+      removeValue(principal.getName(), newValues);
     }
 
+    // Set the property value under file/members to the new ACL situation.
+    membersNode.setProperty(property, newValues.toArray(new Value[newValues.size()]));
+  }
+
+  /**
+   * Remove a string value from a list of values.
+   * 
+   * @param name
+   *          The string to remove.
+   * @param values
+   *          The list of values.
+   * @throws RepositoryException
+   */
+  protected void removeValue(String name, List<Value> values) throws RepositoryException {
+    Value toRemove = null;
+    for (Value value : values) {
+      if (value.getString().equals(name)) {
+        toRemove = value;
+      }
+    }
+    if (toRemove != null) {
+      values.remove(toRemove);
+    }
+  }
+
+  /**
+   * Adds a string to a list of values only if that string isn't in the list of values
+   * already.
+   * 
+   * @param name
+   *          The string to add.
+   * @param values
+   *          A list of values.
+   * @param valueFactory
+   *          A ValueFactory to create the jcr {@link Value}.
+   * @throws RepositoryException
+   */
+  protected void addValue(String name, List<Value> values, ValueFactory valueFactory)
+      throws RepositoryException {
+    boolean add = true;
+    for (Value v : values) {
+      if (v.getString().equals(name)) {
+        add = false;
+        break;
+      }
+    }
+    if (add) {
+      values.add(valueFactory.createValue(name));
+    }
   }
 
   /**

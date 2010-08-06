@@ -18,3 +18,20 @@
 
 // Node type for files
 [sakai:file] > nt:file, sakai:propertiesmix
+
+// Node type for the members node
+[sakai:pooledcontentmembers] > nt:unstructured
+- sakai:managers (string) multiple mandatory
+- sakai:viewers (string) multiple mandatory
+
+// Node type for pooled content
+// A ppoled content node has a sling:resourceType and a childnode 'members'
+// of type sakai:pooledcontentmembers
+[sakai:pooledcontent] > nt:file, sakai:propertiesmix
+- sling:resourceType (string)
+  = 'sakai/pooled-content'
+  autocreated mandatory
++ members 
+  = sakai:pooledcontentmembers
+  mandatory
+

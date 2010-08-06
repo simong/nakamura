@@ -1,8 +1,18 @@
 package org.sakaiproject.nakamura.files.pool;
 
-import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY;
+import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
+
+import static org.apache.jackrabbit.JcrConstants.NT_RESOURCE;
 
 import static javax.jcr.security.Privilege.JCR_ALL;
+import static javax.jcr.security.Privilege.JCR_READ;
+import static org.apache.sling.jcr.base.util.AccessControlUtil.replaceAccessControlEntry;
+import static org.apache.sling.jcr.resource.JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_FILENAME;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_MANAGERS;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_NODENAME;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_VIEWERS;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_RT;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -19,7 +29,6 @@ import org.apache.sling.jcr.api.SlingRepository;
 import org.apache.sling.jcr.base.util.AccessControlUtil;
 import org.osgi.service.component.ComponentContext;
 import org.sakaiproject.nakamura.api.cluster.ClusterTrackingService;
-import org.sakaiproject.nakamura.api.jcr.JCRConstants;
 import org.sakaiproject.nakamura.api.user.UserConstants;
 import org.sakaiproject.nakamura.util.JcrUtils;
 import org.sakaiproject.nakamura.util.StringUtils;
@@ -140,9 +149,8 @@ public class CreateContentPoolServlet extends SlingAllMethodsServlet {
       }
     }
 
-    Node fileNode = JcrUtils.deepGetOrCreateNode(session, path, JcrConstants.NT_FILE);
-    Node resourceNode = JcrUtils.deepGetOrCreateNode(session, fileNode.getPath() + "/"
-        + JcrConstants.JCR_CONTENT, JcrConstants.NT_RESOURCE);
+    Node fileNode = JcrUtils.deepGetOrCreateNode(session, path, "sakai:pooledcontent");
+    Node resourceNode = fileNode.addNode(JCR_CONTENT, NT_RESOURCE);
     resourceNode.setProperty(JcrConstants.JCR_LASTMODIFIED, Calendar.getInstance());
     resourceNode.setProperty(JcrConstants.JCR_MIMETYPE, contentType);
     resourceNode.setProperty(JcrConstants.JCR_DATA, session.getValueFactory()
@@ -168,13 +176,19 @@ public class CreateContentPoolServlet extends SlingAllMethodsServlet {
     AccessControlUtil.replaceAccessControlEntry(session, path, everyone, null,
         new String[] { JCR_ALL }, null, null);
 
-    fileNode.addMixin(JCRConstants.MIX_SAKAIPROPERTIES);
     // set some properties to make it possible to locate this pool file without
     // having to use the path.
-    fileNode.setProperty("sakai:pool-file", "1");
-    fileNode.setProperty("sakai:pool-file-owner", userPrincipal.getName());
-    fileNode.setProperty("sakai:pool-file-name", value.getFileName());
-    fileNode.setProperty(SLING_RESOURCE_TYPE_PROPERTY, "sakai/pooled-content");
+    fileNode.setProperty(POOLED_CONTENT_FILENAME, value.getFileName());
+    fileNode.setProperty(SLING_RESOURCE_TYPE_PROPERTY, POOLED_CONTENT_RT);
+
+    // Add a members node that has the managers and viewers on it.
+    Node membersNode = fileNode.addNode(POOLED_CONTENT_MEMBERS_NODENAME);
+    membersNode.setProperty(POOLED_CONTENT_MEMBERS_MANAGERS, new String[] { userPrincipal
+        .getName() });
+    membersNode.setProperty(POOLED_CONTENT_MEMBERS_VIEWERS, new String[] {});
+    // sakai:managers & sakai:viewers can only be modified by the admin.
+    replaceAccessControlEntry(session, membersNode.getPath(), everyone,
+        new String[] { JCR_READ }, new String[] { JCR_ALL }, null, null);
 
   }
 

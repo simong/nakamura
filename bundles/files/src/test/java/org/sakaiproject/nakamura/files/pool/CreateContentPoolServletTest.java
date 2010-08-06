@@ -18,6 +18,14 @@
 
 package org.sakaiproject.nakamura.files.pool;
 
+import static org.apache.jackrabbit.JcrConstants.JCR_CONTENT;
+import static org.apache.jackrabbit.JcrConstants.NT_RESOURCE;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_MANAGERS;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_NODENAME;
+import static org.sakaiproject.nakamura.api.files.FilesConstants.POOLED_CONTENT_MEMBERS_VIEWERS;
+
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.api.JackrabbitSession;
 import org.apache.jackrabbit.api.security.principal.PrincipalManager;
@@ -31,6 +39,7 @@ import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -72,10 +81,12 @@ public class CreateContentPoolServletTest {
   @Mock
   private Node resourceNode;
   @Mock
+  private Node membersNode;
+  @Mock
   private AccessControlManager accessControlManager;
   @Mock
   private Privilege allPrivilege;
-  
+
   private AccessControlList accessControlList;
   @Mock
   private ValueFactory valueFactory;
@@ -102,114 +113,117 @@ public class CreateContentPoolServletTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
-  
   @Test
-  public void testCreate() throws RepositoryException, ServletException, IOException, JSONException {
+  public void testCreate() throws RepositoryException, ServletException, IOException,
+      JSONException {
 
     // activate
-    Mockito.when(clusterTrackingService.getCurrentServerId()).thenReturn("serverID");
-    Mockito.when(slingRepository.loginAdministrative(null)).thenReturn(adminSession);
-    
-    Mockito.when(adminSession.getPrincipalManager()).thenReturn(principalManager);
-    Mockito.when(adminSession.getAccessControlManager()).thenReturn(accessControlManager);
-    Mockito.when(request.getRemoteUser()).thenReturn("ieb");
-    Mockito.when(principalManager.getPrincipal("ieb")).thenReturn(iebPrincipal);
-    
-    
-    
-    Mockito.when(request.getRequestParameterMap()).thenReturn(requestParameterMap);
+    when(clusterTrackingService.getCurrentServerId()).thenReturn("serverID");
+    when(slingRepository.loginAdministrative(null)).thenReturn(adminSession);
+
+    when(adminSession.getPrincipalManager()).thenReturn(principalManager);
+    when(adminSession.getAccessControlManager()).thenReturn(accessControlManager);
+    when(request.getRemoteUser()).thenReturn("ieb");
+    when(principalManager.getPrincipal("ieb")).thenReturn(iebPrincipal);
+
+    when(request.getRequestParameterMap()).thenReturn(requestParameterMap);
     Map<String, RequestParameter[]> map = new HashMap<String, RequestParameter[]>();
-    
-    RequestParameter[] requestParameters = new RequestParameter[] {
-        requestParameter1,
-        requestParameterNot,
-        requestParameter2,
-    };
+
+    RequestParameter[] requestParameters = new RequestParameter[] { requestParameter1,
+        requestParameterNot, requestParameter2, };
     map.put("files", requestParameters);
-   
-    Mockito.when(requestParameterMap.entrySet()).thenReturn(map.entrySet());
-    
-    Mockito.when(requestParameter1.isFormField()).thenReturn(false);
-    Mockito.when(requestParameter1.getContentType()).thenReturn("application/pdf");
-    Mockito.when(requestParameter1.getFileName()).thenReturn("testfilename.pdf");
+
+    when(requestParameterMap.entrySet()).thenReturn(map.entrySet());
+
+    when(requestParameter1.isFormField()).thenReturn(false);
+    when(requestParameter1.getContentType()).thenReturn("application/pdf");
+    when(requestParameter1.getFileName()).thenReturn("testfilename.pdf");
     InputStream input1 = new ByteArrayInputStream(new byte[10]);
-    Mockito.when(requestParameter1.getInputStream()).thenReturn(input1);
-    
-    Mockito.when(requestParameter2.isFormField()).thenReturn(false);
-    Mockito.when(requestParameter2.getContentType()).thenReturn("text/html");
-    Mockito.when(requestParameter2.getFileName()).thenReturn("index.html");
+    when(requestParameter1.getInputStream()).thenReturn(input1);
+
+    when(requestParameter2.isFormField()).thenReturn(false);
+    when(requestParameter2.getContentType()).thenReturn("text/html");
+    when(requestParameter2.getFileName()).thenReturn("index.html");
     InputStream input2 = new ByteArrayInputStream(new byte[10]);
-    Mockito.when(requestParameter2.getInputStream()).thenReturn(input2);
+    when(requestParameter2.getInputStream()).thenReturn(input2);
 
-    Mockito.when(requestParameterNot.isFormField()).thenReturn(true);
+    when(requestParameterNot.isFormField()).thenReturn(true);
 
-    
-    
-    
     // deep create
-    Mockito.when(adminSession.itemExists(Mockito.anyString())).thenReturn(true);
-    Mockito.when(adminSession.getItem(Mockito.anyString())).thenReturn(parentNode,resourceNode);
-    Mockito.when(parentNode.getPath()).thenReturn("/_p/hashedpath/id");
-    Mockito.when(resourceNode.getPath()).thenReturn("/_p/hashedpath/id/"+JcrConstants.JCR_CONTENT);
-    Mockito.when(adminSession.getValueFactory()).thenReturn(valueFactory);
-    Mockito.when(valueFactory.createBinary(Mockito.any(InputStream.class))).thenReturn(binary);
-    
+    when(adminSession.itemExists(Mockito.anyString())).thenReturn(true);
+    when(adminSession.getItem(Mockito.anyString())).thenReturn(parentNode);
+    when(parentNode.addNode(JCR_CONTENT, NT_RESOURCE)).thenReturn(resourceNode);
+    when(parentNode.getPath()).thenReturn("/_p/hashedpath/id");
+    when(resourceNode.getPath()).thenReturn(
+        "/_p/hashedpath/id/" + JcrConstants.JCR_CONTENT);
+    when(resourceNode.getPath()).thenReturn(
+        "/_p/hashedpath/id/" + JcrConstants.JCR_CONTENT);
+    when(adminSession.getValueFactory()).thenReturn(valueFactory);
+    when(valueFactory.createBinary(Mockito.any(InputStream.class))).thenReturn(binary);
+
     // access control utils
-    final AccessControlEntry[] ace = new AccessControlEntry[0];
     accessControlList = new AccessControlList() {
 
       // Add an "addEntry" method so AccessControlUtil can execute something.
       // This method doesn't do anything useful.
-      public boolean addEntry(Principal principal, Privilege[] privileges, boolean isAllow) throws AccessControlException { 
+      @SuppressWarnings("unused")
+      public boolean addEntry(Principal principal, Privilege[] privileges, boolean isAllow)
+          throws AccessControlException {
         return true;
       }
-      
+
       public void removeAccessControlEntry(AccessControlEntry ace)
           throws AccessControlException, RepositoryException {
-        // TODO Auto-generated method stub
-        
       }
-      
+
       public AccessControlEntry[] getAccessControlEntries() throws RepositoryException {
-        return ace;
+        return new AccessControlEntry[0];
       }
-      
+
       public boolean addAccessControlEntry(Principal principal, Privilege[] privileges)
           throws AccessControlException, RepositoryException {
-        // TODO Auto-generated method stub
         return false;
       }
     };
-    Mockito.when(accessControlManager.privilegeFromName(Mockito.anyString())).thenReturn(allPrivilege);
-    AccessControlPolicy[] acp = new AccessControlPolicy[] {accessControlList};
-    Mockito.when(accessControlManager.getPolicies(Mockito.anyString())).thenReturn(acp);
-    
-    // saving
-    Mockito.when(adminSession.hasPendingChanges()).thenReturn(true);
-    
-    StringWriter stringWriter = new StringWriter();
-    Mockito.when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
-    
-   
+    when(accessControlManager.privilegeFromName(Mockito.anyString())).thenReturn(
+        allPrivilege);
+    AccessControlPolicy[] acp = new AccessControlPolicy[] { accessControlList };
+    when(accessControlManager.getPolicies(Mockito.anyString())).thenReturn(acp);
 
-    
+    // Mock the members node behaviour
+    when(parentNode.addNode(POOLED_CONTENT_MEMBERS_NODENAME)).thenReturn(membersNode);
+    ArgumentCaptor<String[]> managersCaptor = ArgumentCaptor.forClass(String[].class);
+    ArgumentCaptor<String[]> viewersCaptor = ArgumentCaptor.forClass(String[].class);
+    when(
+        membersNode.setProperty(Mockito.eq(POOLED_CONTENT_MEMBERS_MANAGERS),
+            managersCaptor.capture())).thenReturn(null);
+    when(
+        membersNode.setProperty(Mockito.eq(POOLED_CONTENT_MEMBERS_VIEWERS), viewersCaptor
+            .capture())).thenReturn(null);
+
+    // saving
+    when(adminSession.hasPendingChanges()).thenReturn(true);
+
+    StringWriter stringWriter = new StringWriter();
+    when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
+
     CreateContentPoolServlet cp = new CreateContentPoolServlet();
     cp.clusterTrackingService = clusterTrackingService;
     cp.slingRepository = slingRepository;
     cp.activate(componentContext);
-    
+
     cp.doPost(request, response);
-    
+
+    // Verify that we created all the nodes.
+    assertEquals(1, managersCaptor.getValue().length);
+    assertEquals(iebPrincipal.getName(), managersCaptor.getValue()[0]);
+    assertEquals(0, viewersCaptor.getValue().length);
+
     JSONObject jsonObject = new JSONObject(stringWriter.toString());
     Assert.assertNotNull(jsonObject.getString("testfilename.pdf"));
     Assert.assertNotNull(jsonObject.getString("index.html"));
     Assert.assertEquals(2, jsonObject.length());
-    
-    
 
   }
-
-
 
 }
