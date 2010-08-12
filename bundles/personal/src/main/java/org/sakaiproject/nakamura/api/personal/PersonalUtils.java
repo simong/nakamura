@@ -18,6 +18,7 @@
 package org.sakaiproject.nakamura.api.personal;
 
 import static org.sakaiproject.nakamura.api.personal.PersonalConstants.AUTH_PROFILE;
+import static org.sakaiproject.nakamura.api.personal.PersonalConstants.GROUP_DESCRIPTION_PROPERTY;
 import static org.sakaiproject.nakamura.api.personal.PersonalConstants.GROUP_TITLE_PROPERTY;
 import static org.sakaiproject.nakamura.api.personal.PersonalConstants.PRIVATE;
 import static org.sakaiproject.nakamura.api.personal.PersonalConstants.PUBLIC;
@@ -238,6 +239,7 @@ public class PersonalUtils {
         write.key("jcr:name");
         write.value(profileNode.getName());
         writeValue(GROUP_TITLE_PROPERTY, profileNode, write);
+        writeValue(GROUP_DESCRIPTION_PROPERTY, profileNode, write);
       } catch (Exception e) {
         // The provided user-string is probably not a user id.
         LOGGER.warn(e.getMessage(), e);
