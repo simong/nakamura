@@ -39,6 +39,7 @@
             <Private-Package>
               org.sakaiproject.nakamura.files.*
             </Private-Package>
+            <Import-Package>!net.sourceforge.cobertura.coveragedata.*, *</Import-Package>
             <Sling-Initial-Content>SLING-INF/content;overwriteProperties:=true;uninstall:=false</Sling-Initial-Content>
           </instructions>
         </configuration>
@@ -254,5 +255,30 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.sourceforge.cobertura</groupId>
+      <artifactId>cobertura</artifactId>
+    </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>cobertura-activate</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <instructions>
+                <Bundle-Activator>org.sakaiproject.nakamura.files.CoberturaActivator</Bundle-Activator>
+                <!-- Add Import-Package to override build settings -->
+                <Import-Package>net.sourceforge.cobertura.coveragedata.*, *</Import-Package>
+              </instructions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
