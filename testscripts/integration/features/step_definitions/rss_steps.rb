@@ -17,10 +17,6 @@ Given /^I have a non\-RSS file$/ do
   @feedUrl = "http://www.google.com"
 end
 
-Then /^I receive a service error$/ do
-  raise "Expected an error response." unless 400 == @httpResponse.code.to_i
-end
-
 Given /^I have an invalid RSS XML feed$/ do
   @feedUrl = "http://www.w3schools.com/xml/note.xml"
 end

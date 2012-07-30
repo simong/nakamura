@@ -8,15 +8,15 @@ Scenario: Requesting valid RSS
 Scenario: Requesting non-RSS file
   Given I have a non-RSS file
   When I request the feed from nakamura
-  Then I receive a service error
+  Then I receive a bad request error
 
 Scenario: Requesting invalid RSS
   Given I have an invalid RSS XML feed
   When I request the feed from nakamura
-  Then I receive a service error
+  Then I receive a bad request error
 
 Scenario: Requesting a huge file
   Given I have a huge file
   When I request the feed from nakamura
-  Then I receive a service error
+  Then I receive a bad request error
 
