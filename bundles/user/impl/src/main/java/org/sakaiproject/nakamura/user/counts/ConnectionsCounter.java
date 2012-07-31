@@ -30,10 +30,7 @@ public class ConnectionsCounter {
     // invited or pending.
     String userID = au.getId();
     Authorizable g = authorizableManager.findAuthorizable("g-contacts-" + userID);
-    if (g instanceof Group) {
-      return ((Group) g).getMembers().length;
-    }
-    return 0;
+    return ((Group) g).getMembers().length;
   }
 
 }
