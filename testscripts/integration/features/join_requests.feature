@@ -31,3 +31,10 @@ Scenario: Requesting to Join a Group Which is Joinable
   And I have authenticated as User "alice"
   When I request to join Group "test-group"
   Then I become a member of Group "test-group"
+
+Scenario: Requesting to Join a Group Which is Joinable With Authorization
+  Given There is a group "test-group"
+  And the Group "test-group" is joinable with authorization
+  And I have authenticated as User "alice"
+  When I request to join Group "test-group"
+  Then my join request on Group "test-group" will be stored
