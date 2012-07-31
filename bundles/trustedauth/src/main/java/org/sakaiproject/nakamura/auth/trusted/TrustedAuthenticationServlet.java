@@ -190,7 +190,7 @@ public final class TrustedAuthenticationServlet extends HttpServlet implements H
               AuthorizableManager am = session.getAuthorizableManager();
               Authorizable a = am.findAuthorizable(userId);
               if ( a == null ) {
-                LOGGER.info("Authenticated User {} does not exist");
+                LOGGER.info("Authenticated User {} does not exist", userId);
                 authAction.setAction(AuthenticatedAction.REDIRECT);
                 return null;
               }

@@ -17,7 +17,7 @@ class TC_Kern854 < Test::Unit::TestCase
     # Store the original widget settings somewhere.
     @widget_options = getWidgetServiceConfiguration()
     widgetsPath = "/testarea/widgets-#{m}/widgets"
-    folders = @widget_options["sakai.batch.widgets.widget_folders"]["values"]
+    folders = @widget_options["properties"]["sakai.batch.widgets.widget_folders"]["values"]
 
     # Add our own widgets to it.
     folders.concat([widgetsPath])
@@ -83,7 +83,7 @@ class TC_Kern854 < Test::Unit::TestCase
 
   def teardown
     # Reset the widget service again.
-    setWidgetServiceConfigurationPath(@widget_options["sakai.batch.widgets.widget_folders"]["values"])
+    setWidgetServiceConfigurationPath(@widget_options["properties"]["sakai.batch.widgets.widget_folders"]["values"])
   end
 
 end

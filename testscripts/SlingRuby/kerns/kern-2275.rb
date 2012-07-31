@@ -21,17 +21,17 @@ class TC_Kern2275 < Test::Unit::TestCase
     # test setting the visiblity.preference in DefaultPostProcessor config
     response = set_visibility_pref "logged_in"
     config = get_config
-    visibility_pref = config["visibility.preference"]["value"]
+    visibility_pref = config["properties"]["visibility.preference"]["value"]
     assert_equal("logged_in", visibility_pref)
     
     response = set_visibility_pref "private"
     config = get_config
-    visibility_pref = config["visibility.preference"]["value"]
+    visibility_pref = config["properties"]["visibility.preference"]["value"]
     assert_equal("private", visibility_pref)
     
     response = set_visibility_pref "public"
     config = get_config
-    visibility_pref = config["visibility.preference"]["value"]
+    visibility_pref = config["properties"]["visibility.preference"]["value"]
     assert_equal("public", visibility_pref)
   end
   
