@@ -69,6 +69,7 @@ public class BasicUserInfoServiceTest {
     userProps.put("lastName", "Boston");
     userProps.put("email", "ieb@gmail.com");
     assertTrue(aam.createUser("ieb", "Ian Boston", "password", userProps));
+    assertTrue(aam.createGroup("g-contacts-ieb", "g-contacts-ieb", null));
     adminSession.logout();
     session = repository.loginAdministrative("ieb");
     basicUserInfoService = new BasicUserInfoServiceImpl();
