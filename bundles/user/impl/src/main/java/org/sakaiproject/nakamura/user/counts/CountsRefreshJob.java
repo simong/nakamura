@@ -83,10 +83,7 @@ public class CountsRefreshJob implements Job {
         response = solrServer.query(solrQuery, SolrRequest.METHOD.POST);
         SolrDocumentList results = response.getResults();
         long numResults = results.getNumFound();
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("with query {}, found {} results", new Object[] { queryString,
-              numResults });
-        }
+        LOGGER.debug("with query {}, found {} results", new Object[] { queryString, numResults });
         if (numResults > 0) {
           batchSize = (int) (batchSize < numResults ? batchSize : numResults);
           LOGGER.info("will update counts on max of {} authorizables",

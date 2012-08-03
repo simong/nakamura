@@ -43,16 +43,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.jcr.RepositoryException;
-
 public class TagUtils {
+
+  public static final String CONTENT_MANAGER_LABEL = ", contentManager:";
+
+  private TagUtils() {
+
+  }
+
   /**
    * Check if a node is a proper sakai tag.
    *
    * @param node
    *          The node to check if it is a tag.
    * @return true if the node is a tag, false if it is not.
-   * @throws RepositoryException
    */
   public static boolean isTag(Content node) {
     return (node != null && node.hasProperty(SLING_RESOURCE_TYPE_PROPERTY)
@@ -62,8 +66,9 @@ public class TagUtils {
   }
 
   /**
-   * @param contentNode
-   * @param tagNode
+   * @param cm a <code>ContentManager</code> for updating the content node with tags
+   * @param contentNode the <code>Content</code> to be tagged
+   * @param tagNodes <code>List</code> of <code>Content</code> representing the tags to add
    * @return A list of all tags that were applied. Check for dropped tags with
    *         tagNode.length != addTag(contentNode, tagNode).size()
    */
@@ -72,7 +77,7 @@ public class TagUtils {
     // input validation
     if (contentNode == null || cm == null) {
       throw new IllegalArgumentException("Missing a required argument:: contentNode:" + contentNode
-          + ", contentManager:" + cm);
+          + CONTENT_MANAGER_LABEL + cm);
     }
 
     List<Content> addedTags = Lists.newArrayList();
@@ -99,7 +104,7 @@ public class TagUtils {
     // input validation
     if (content == null || contentManager == null) {
       throw new IllegalArgumentException("Missing a required argument:: content:" + content
-          + ", contentManager:" + contentManager);
+          + CONTENT_MANAGER_LABEL + contentManager);
     }
 
     if (StringUtils.isBlank(tag)) {
@@ -127,7 +132,7 @@ public class TagUtils {
     // input validation
     if (tagNode == null || cm == null) {
       throw new IllegalArgumentException("Missing a required argument:: tagNode:" + tagNode
-          + ", contentManager:" + cm);
+          + CONTENT_MANAGER_LABEL + cm);
     }
 
     Collection<String> rv = new ArrayList<String>();
@@ -167,7 +172,7 @@ public class TagUtils {
     // input validation
     if (cm == null || tagNode == null) {
       throw new IllegalArgumentException("Missing a required argument:: tagNode:" + tagNode
-          + ", contentManager:" + cm);
+          + CONTENT_MANAGER_LABEL + cm);
     }
 
     if (tagNames != null && tagNames.length > 0) {
@@ -206,18 +211,20 @@ public class TagUtils {
     // input validation
     if (nodeTag == null || cm == null) {
       throw new IllegalArgumentException("Missing a required argument:: nodeTag:" + nodeTag
-          + ", contentManager:" + cm);
+          + CONTENT_MANAGER_LABEL + cm);
     }
 
     if (calledByAChild || !TagUtils.alreadyTaggedBelowThisLevel(nodeTag, tagNames, cm)) {
-      Long tagCount = increase ? 1L : 0L;
+      Long tagCount;
       if (nodeTag.hasProperty(SAKAI_TAG_COUNT)) {
         tagCount = StorageClientUtils.toLong(nodeTag.getProperty(SAKAI_TAG_COUNT));
-        if (increase) {
-          tagCount++;
-        } else {
-          tagCount--;
-        }
+      } else {
+        tagCount = 0L;
+      }
+      if (increase) {
+        tagCount++;
+      } else {
+        tagCount--;
       }
       nodeTag.setProperty(SAKAI_TAG_COUNT, tagCount);
       cm.update(nodeTag);

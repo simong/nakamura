@@ -236,8 +236,7 @@ public class AuthorizableIndexingHandler implements IndexingHandler {
    * Create the SolrInputDocument for an authorizable.
    *
    * @param authorizable
-   * @param doc
-   * @param properties
+   * @param repositorySession
    * @return The SolrInputDocument or null if authorizable shouldn't be indexed.
    */
   protected SolrInputDocument createAuthDoc(Authorizable authorizable, RepositorySession repositorySession) {

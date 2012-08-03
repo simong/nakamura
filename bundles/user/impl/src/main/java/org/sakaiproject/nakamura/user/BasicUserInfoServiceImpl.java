@@ -30,6 +30,7 @@ import static org.sakaiproject.nakamura.api.user.UserConstants.PROP_ROLE_TITLE;
 import static org.sakaiproject.nakamura.api.user.UserConstants.PROP_ROLE_TITLE_PLURAL;
 import static org.sakaiproject.nakamura.api.user.UserConstants.SAKAI_CATEGORY;
 import static org.sakaiproject.nakamura.api.user.UserConstants.USER_BASIC;
+import static org.sakaiproject.nakamura.api.user.UserConstants.USER_BASIC_ACCESS;
 import static org.sakaiproject.nakamura.api.user.UserConstants.USER_COLLEGE;
 import static org.sakaiproject.nakamura.api.user.UserConstants.USER_COUNTS_PROPS;
 import static org.sakaiproject.nakamura.api.user.UserConstants.USER_DATEOFBIRTH;
@@ -223,10 +224,10 @@ public class BasicUserInfoServiceImpl implements BasicUserInfoService {
     }
     // The map were we will stick the compact information in.
     Map<String, Object> basicInfo = basicInfo(propertyBuilder.build());
-    if ( authorizable.hasProperty("access")) {
-      basicInfo.put("access", authorizable.getProperty("access"));
+    if ( authorizable.hasProperty(USER_BASIC_ACCESS)) {
+      basicInfo.put(USER_BASIC_ACCESS, authorizable.getProperty(USER_BASIC_ACCESS));
     } else {
-      basicInfo.put(UserConstants.USER_BASIC_ACCESS, UserConstants.EVERYBODY_ACCESS_VALUE);
+      basicInfo.put(USER_BASIC_ACCESS, UserConstants.EVERYBODY_ACCESS_VALUE);
     }
     return basicInfo;
   }

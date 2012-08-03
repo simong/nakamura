@@ -2,8 +2,7 @@
 @user
 
 Given /^I have a user called "([^"]*)"$/ do |username|
-  m = Time.now.to_f.to_s.gsub(".", "")
-  @user = @um.create_user(username + m)
+  @user = @um.create_user(username + @m)
 end
 
 Given /^I have logged in as "([^"]*)"$/ do |username|
