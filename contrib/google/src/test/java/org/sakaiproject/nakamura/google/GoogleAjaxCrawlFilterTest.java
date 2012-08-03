@@ -2,10 +2,13 @@ package org.sakaiproject.nakamura.google;
 
 import junit.framework.Assert;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +20,19 @@ import javax.servlet.ServletRequest;
 public class GoogleAjaxCrawlFilterTest {
 
   private GoogleAjaxCrawlFilter filter = new GoogleAjaxCrawlFilter();
-
   private ServletRequest request;
+  private static File phantomjs;
+
+  @BeforeClass
+  public static void beforeClass() throws IOException {
+    // Fake a file.
+    phantomjs = File.createTempFile("phantomjs", "tmp");
+  }
+
+  @AfterClass
+  public static void tearDown() {
+    phantomjs.delete();
+  }
 
   @Before
   public void setUp() {
@@ -27,7 +41,7 @@ public class GoogleAjaxCrawlFilterTest {
     Mockito.when(request.getServerPort()).thenReturn(8080);
 
     Map<String, Object> properties = new HashMap<String, Object>();
-    properties.put(GoogleAjaxCrawlFilter.PHANTOMJS_PATH, "phantomjs");
+    properties.put(GoogleAjaxCrawlFilter.PHANTOMJS_PATH, phantomjs.getAbsolutePath());
     filter.activate(properties);
   }
 
@@ -45,7 +59,7 @@ public class GoogleAjaxCrawlFilterTest {
   public void testCommand() {
     String url = "http://localhost:8080/";
     String cmd = filter.getCommand(url);
-    Assert.assertTrue(cmd.startsWith("phantomjs"));
+    Assert.assertTrue(cmd.startsWith(phantomjs.getAbsolutePath()));
     Assert.assertTrue(cmd.endsWith(cmd));
   }
 

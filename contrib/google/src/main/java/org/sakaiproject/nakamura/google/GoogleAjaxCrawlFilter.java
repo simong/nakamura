@@ -197,6 +197,12 @@ public class GoogleAjaxCrawlFilter implements Filter {
   @Modified
   public void modify(Map<String, Object> properties) {
     phantomJSPath = properties.get(PHANTOMJS_PATH).toString();
-  }
 
+    // Make sure that it exists!
+    File f = new File(phantomJSPath);
+    if (!f.exists()) {
+      throw new RuntimeException(
+          "Couldn't find the phantomJS binary at the provided path: " + phantomJSPath);
+    }
+  }
 }
