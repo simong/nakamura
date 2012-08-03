@@ -27,6 +27,7 @@ public class GoogleAjaxCrawlFilterTest {
   public static void beforeClass() throws IOException {
     // Fake a file.
     phantomjs = File.createTempFile("phantomjs", "tmp");
+    phantomjs.setExecutable(true);
   }
 
   @AfterClass

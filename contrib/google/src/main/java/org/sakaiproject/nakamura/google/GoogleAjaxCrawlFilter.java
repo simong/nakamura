@@ -211,7 +211,7 @@ public class GoogleAjaxCrawlFilter implements Filter {
 
     // Couldn't find it in the PATH, try an absolute path approach.
     File f = new File(phantomJSPath);
-    if (f.exists()) {
+    if (!f.exists() || (f.exists() && !f.canExecute())) {
       throw new RuntimeException(
           "Couldn't find the phantomJS binary in the PATH or at the provided path: "
               + phantomJSPath);
