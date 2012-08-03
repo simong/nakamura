@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.sakaiproject.nakamura.util.IOUtils;
+import org.sakaiproject.nakamura.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 @Service(value = Filter.class)
-@Component(immediate = true, metatype = false)
+@Component(immediate = false, metatype = false)
 @Properties(value = {
     @Property(name = "service.description", value = "Runs the requested page trough a headless browser so we can display proper content to the Google Crawler."),
     @Property(name = "service.vendor", value = "The Sakai Foundation"),
@@ -38,7 +39,7 @@ public class GoogleAjaxCrawlFilter implements Filter {
   private static final Logger LOGGER = LoggerFactory
       .getLogger(GoogleAjaxCrawlFilter.class);
 
-  @Property(description = "The path to the binary where phantomjs lives.", value = "/opt/sakai/oae/phantomjs/bin/phantomjs")
+  @Property(description = "The path to the binary where phantomjs lives.", value = "phantomjs")
   public static final String PHANTOMJS_PATH = "sakai.googlecrawlfilter.phantomJSPath";
   private String phantomJSPath;
   private String tempPath;
@@ -198,11 +199,22 @@ public class GoogleAjaxCrawlFilter implements Filter {
   public void modify(Map<String, Object> properties) {
     phantomJSPath = properties.get(PHANTOMJS_PATH).toString();
 
-    // Make sure that it exists!
+    // Check in the PATH environment variable first.
+    String syspath = System.getenv("PATH");
+    String[] dirs = StringUtils.split(syspath, File.pathSeparatorChar);
+    for (String dir : dirs) {
+      File file = new File(dir, phantomJSPath);
+      if (file.isFile() && file.canExecute()) {
+        return;
+      }
+    }
+
+    // Couldn't find it in the PATH, try an absolute path approach.
     File f = new File(phantomJSPath);
-    if (!f.exists()) {
+    if (f.exists()) {
       throw new RuntimeException(
-          "Couldn't find the phantomJS binary at the provided path: " + phantomJSPath);
+          "Couldn't find the phantomJS binary in the PATH or at the provided path: "
+              + phantomJSPath);
     }
   }
 }
