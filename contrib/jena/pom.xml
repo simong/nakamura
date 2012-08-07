@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- 
+ * Based on http://tech.groups.yahoo.com/group/jena-dev/message/32912, thanks Matteo!
+ *
+ * Licensed to the Sakai Foundation (SF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The SF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sakaiproject.nakamura</groupId>
+    <artifactId>base</artifactId>
+    <version>1.5.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <packaging>bundle</packaging>
+  <artifactId>org.sakaiproject.nakamura.jena</artifactId>
+  <name>Sakai Nakamura :: Jena bundle</name>
+  <description>All required dependencies for Jena</description>
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+            <instructions>
+                <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                <Embed-Dependency>*;artifactId=!commons-logging</Embed-Dependency>
+                <Embed-Transitive>true</Embed-Transitive>
+                <Import-Package>
+                    !com.hp.hpl.jena.*.test,
+                    !org.apache.xml.resolver.*,
+                    !sun.*,
+                    !com.sun.jdmk.*,
+                    !javax.jms.*,
+                    !com.ibm.uvm.tools,
+                    !javax.jmdns,
+                    !javax.annotation.meta,
+                    *
+                </Import-Package>
+                <Export-Package>com.hp.hpl.jena.*, org.apache.xerces.util</Export-Package>
+            </instructions>
+          </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+      <!-- 
+  <dependency>
+    <groupId>com.hp.hpl.jena</groupId>
+    <artifactId>arq</artifactId>
+    <version>2.8.8</version>
+    <exclusions>
+      <exclusion>
+        <artifactId>xmlParserAPIs</artifactId>
+        <groupId>xerces</groupId>
+      </exclusion>
+      <exclusion>
+        <artifactId>xercesImpl</artifactId>
+        <groupId>xerces</groupId>
+      </exclusion>
+    </exclusions>
+  </dependency>
+   -->
+  <dependency>
+    <groupId>com.hp.hpl.jena</groupId>
+    <artifactId>jena</artifactId>
+    <version>2.6.4</version>
+    <exclusions>
+      <exclusion>
+        <artifactId>xmlParserAPIs</artifactId>
+        <groupId>xerces</groupId>
+      </exclusion>
+     <exclusion>
+        <artifactId>xercesImpl</artifactId>
+        <groupId>xerces</groupId>
+      </exclusion> 
+    </exclusions> 
+  </dependency>
+  <dependency>
+    <groupId>xerces</groupId>
+    <artifactId>xercesImpl</artifactId>
+    <version>2.9.1</version>
+  </dependency>
+</dependencies>
+</project>

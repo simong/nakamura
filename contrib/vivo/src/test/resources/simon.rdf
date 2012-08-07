@@ -1,0 +1,95 @@
+<rdf:RDF
+    xmlns:geo="http://aims.fao.org/aos/geopolitical.owl#"
+    xmlns:c4o="http://purl.org/spar/c4o/"
+    xmlns:vitro-public="http://vitro.mannlib.cornell.edu/ns/vitro/public#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:ero="http://purl.obolibrary.org/obo/"
+    xmlns:event="http://purl.org/NET/c4dm/event.owl#"
+    xmlns:pvs="http://vivoweb.org/ontology/provenance-support#"
+    xmlns:dcelem="http://purl.org/dc/elements/1.1/"
+    xmlns:vivo="http://vivoweb.org/ontology/core#"
+    xmlns:vitro="http://vitro.mannlib.cornell.edu/ns/vitro/0.7#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:bibo="http://purl.org/ontology/bibo/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:scires="http://vivoweb.org/ontology/scientific-research#"
+    xmlns:fabio="http://purl.org/spar/fabio/"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" > 
+  <rdf:Description rdf:about="http://localhost:7000/individual/n6660">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Relationship"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Authorship"/>
+    <vivo:linkedAuthor rdf:resource="http://localhost:7000/individual/n516"/>
+    <vivo:linkedInformationResource rdf:resource="http://localhost:7000/individual/n7197"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n1848">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#DateTimeInterval"/>
+    <vivo:start rdf:resource="http://localhost:7000/individual/n2828"/>
+    <vivo:end rdf:resource="http://localhost:7000/individual/n7423"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n7423">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#DateTimeValue"/>
+    <vivo:dateTimePrecision rdf:resource="http://vivoweb.org/ontology/core#yearPrecision"/>
+    <vivo:dateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2067-01-01T00:00:00</vivo:dateTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://vivoweb.org/ontology/core#yearPrecision">
+    <rdfs:label xml:lang="en-US">yearPrecision</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n6035">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Studie en implementatie van een webservice voor audio- en muziekverwerking</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n7197">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Background subtraction with ViBe and shadow removal</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n2828">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#DateTimeValue"/>
+    <vivo:dateTimePrecision rdf:resource="http://vivoweb.org/ontology/core#yearPrecision"/>
+    <vivo:dateTime rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2012-01-01T00:00:00</vivo:dateTime>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n1792">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Relationship"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Authorship"/>
+    <vivo:linkedAuthor rdf:resource="http://localhost:7000/individual/n516"/>
+    <vivo:linkedInformationResource rdf:resource="http://localhost:7000/individual/n6035"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n2677">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Relationship"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Authorship"/>
+    <vivo:linkedAuthor rdf:resource="http://localhost:7000/individual/n516"/>
+    <vivo:linkedInformationResource rdf:resource="http://localhost:7000/individual/n4693"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n2872">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdf:type rdf:resource="http://vivoweb.org/ontology/core#Position"/>
+    <vivo:dateTimeInterval rdf:resource="http://localhost:7000/individual/n1848"/>
+    <vivo:positionForPerson rdf:resource="http://localhost:7000/individual/n516"/>
+    <vivo:positionInOrganization rdf:resource="http://localhost:7000/individual/n1741"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CEO, CTO, CFO, Account Manager, all the things!</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n516">
+    <foaf:lastName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gaeremynck</foaf:lastName>
+    <foaf:firstName rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Simon</foaf:firstName>
+    <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+    <vivo:personInPosition rdf:resource="http://localhost:7000/individual/n2872"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <vivo:primaryEmail>gaeremyncks@gmail.com</vivo:primaryEmail>
+    <vivo:authorInAuthorship rdf:resource="http://localhost:7000/individual/n1792"/>
+    <rdfs:label>Gaeremynck, Simon</rdfs:label>
+    <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+    <vivo:authorInAuthorship rdf:resource="http://localhost:7000/individual/n2677"/>
+    <vivo:authorInAuthorship rdf:resource="http://localhost:7000/individual/n6660"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n1741">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gaeremynck llc</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://localhost:7000/individual/n4693">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">User Defined Runtime Attributes in iOS</rdfs:label>
+  </rdf:Description>
+</rdf:RDF>
