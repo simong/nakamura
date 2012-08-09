@@ -26,6 +26,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 @Service(value = Filter.class)
 @Component(immediate = false, metatype = false)
@@ -103,6 +104,9 @@ public class GoogleAjaxCrawlFilter implements Filter {
       int status = p.waitFor();
       if (status == 0) {
         // Success, Send it too the Googlebot.
+        HttpServletResponse resp = (HttpServletResponse) response;
+        resp.setHeader("Content-Type", "text/html");
+        resp.setHeader("Vary", "Accept-Encoding");
         response.getWriter().write(content.toString());
       } else {
         throw new CrawlerException("Couldn't run phantomjs.");

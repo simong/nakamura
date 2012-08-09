@@ -21,7 +21,7 @@ else {
 	        };
 	
 	        // Give it some time
-	        window.setTimeout(check, 10000);
+	        window.setTimeout(check, 5000);
 	    }
 	    else {
 	    	// For some reason, we couldn't open the page.
