@@ -38,6 +38,7 @@
             <Export-Package>org.sakaiproject.nakamura.api.vivo.*</Export-Package>
             <Private-Package>org.sakaiproject.nakamura.vivo.*</Private-Package>
             <Sling-Initial-Content>SLING-INF/content;overwriteProperties:=true;uninstall:=false</Sling-Initial-Content>
+            <Embed-Dependency>vivo</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
@@ -56,13 +57,19 @@
 	  <groupId>commons-httpclient</groupId>
 	  <artifactId>commons-httpclient</artifactId>
 	</dependency>
+     
+    <dependency>
+        <groupId>org.vivoweb</groupId>
+        <artifactId>vivo</artifactId>
+        <version>1.5.0</version>
+    </dependency>
     
       
     <!-- provided -->
     <dependency>
       <groupId>org.sakaiproject.nakamura</groupId>
       <artifactId>org.sakaiproject.nakamura.user.api</artifactId>
-      <version>1.5.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -74,13 +81,17 @@
     <dependency>
       <groupId>org.sakaiproject.nakamura</groupId>
       <artifactId>org.sakaiproject.nakamura.profile.api</artifactId>
-      <version>1.5.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.sakaiproject.nakamura</groupId>
+      <artifactId>org.sakaiproject.nakamura.solr</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.nakamura</groupId>
       <artifactId>org.sakaiproject.nakamura.doc</artifactId>
-      <version>1.5.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <!--  sling and JCR -->

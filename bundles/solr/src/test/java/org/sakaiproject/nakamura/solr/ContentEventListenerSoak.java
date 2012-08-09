@@ -75,6 +75,10 @@ public class ContentEventListenerSoak {
         return null;
       }
 
+      public SolrServer getServerByName(String name) {
+        return null;
+      }
+
       public SolrServer getUpdateServer() {
         return null;
       }

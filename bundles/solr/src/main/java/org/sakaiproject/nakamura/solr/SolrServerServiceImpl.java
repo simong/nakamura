@@ -75,6 +75,23 @@ public class SolrServerServiceImpl implements SolrServerService, SolrClientListe
 	public SolrServer getServer() {
 		return server.getServer();
 	}
+	
+  public SolrServer getServerByName(String name) {
+    SolrClient client = servers.get(name);
+    if (client == null) {
+      throw new RuntimeException("Can't locate the Solr implementation called " + name);
+    }
+    try {
+      client.enable(this);
+    } catch (IOException e) {
+      throw new RuntimeException("Can't enable the Solr server for " + name);
+    } catch (ParserConfigurationException e) {
+      throw new RuntimeException("Can't enable the Solr server for " + name);
+    } catch (SAXException e) {
+      throw new RuntimeException("Can't enable the Solr server for " + name);
+    }
+    return client.getServer();
+  }
 
 	public SolrServer getUpdateServer() {
 		return server.getUpdateServer();

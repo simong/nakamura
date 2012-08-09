@@ -39,6 +39,15 @@ public interface SolrServerService {
    * @return the location of the Solr Home.
    */
   String getSolrHome();
-
+  
+  /**
+   * In case you need to integrate with multiple solr servers you can use this method to
+   * retrieve your own server.
+   * 
+   * @return the specified solr server.
+   * @throws RunTimeException
+   *           if no server by that name could be found.
+   */
+  SolrServer getServerByName(String name);
 
 }
