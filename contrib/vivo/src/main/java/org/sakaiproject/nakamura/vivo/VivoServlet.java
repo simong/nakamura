@@ -1,7 +1,5 @@
 package org.sakaiproject.nakamura.vivo;
 
-import edu.cornell.mannlib.vitro.webapp.controller.VitroRequest;
-
 import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -24,7 +22,10 @@ public class VivoServlet extends SlingSafeMethodsServlet {
       throws ServletException, IOException {
     
     
-    VitroRequest vreq = new VitroRequest(request);
+    
+    
+    
+    
     
     
   }
