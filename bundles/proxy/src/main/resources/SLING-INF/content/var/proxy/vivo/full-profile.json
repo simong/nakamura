@@ -1,0 +1,16 @@
+{
+    "sling:resourceType": "sakai/proxy",
+    "sakai:request-proxy-endpoint": "http://vivo.example.com/vivo/sakai?uri=${uri}",
+    "sakai:request-proxy-method": "GET",
+    "sakai:title": "VIVO - Full profile",
+    "sakai:shortDescription": "Get a full JSON dump of a VIVO profile..",
+    "sakai:parameters" : [
+        "{\"name\" : \"uri\", \"description\" : \"(Required) The URI of a VIVO profile.\"}"
+    ],
+    "sakai:description": [
+        "Retrieves a full VIVO profile and returns it in JSON format."
+    ],
+    "sakai:response": [
+        ""
+    ]
+}

@@ -17,15 +17,15 @@
  */
 package org.sakaiproject.nakamura.vivo;
 
-public class VivoProfileException extends Exception {
+public class VivoException extends Exception {
 
   private static final long serialVersionUID = -2610913694070844051L;
 
-  public VivoProfileException(String msg, Throwable t) {
+  public VivoException(String msg, Throwable t) {
     super(msg, t);
   }
 
-  public VivoProfileException(String msg) {
+  public VivoException(String msg) {
     super(msg);
   }
 }

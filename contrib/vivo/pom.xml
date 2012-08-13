@@ -38,7 +38,6 @@
             <Export-Package>org.sakaiproject.nakamura.api.vivo.*</Export-Package>
             <Private-Package>org.sakaiproject.nakamura.vivo.*</Private-Package>
             <Sling-Initial-Content>SLING-INF/content;overwriteProperties:=true;uninstall:=false</Sling-Initial-Content>
-            <Embed-Dependency>vivo</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
@@ -46,26 +45,7 @@
     </plugins>
   </build>
   <dependencies>
-	<!-- RDF support -->
-    <dependency>
-        <groupId>org.sakaiproject.nakamura</groupId>
-        <artifactId>org.sakaiproject.nakamura.jena</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-	  <groupId>commons-httpclient</groupId>
-	  <artifactId>commons-httpclient</artifactId>
-	</dependency>
-    <dependency>
-    	<groupId>com.google.code.gson</groupId>
-    	<artifactId>gson</artifactId>
-    	<version>1.7.1</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
-    </dependency>
-      
-    <!-- provided -->
+	<!-- provided -->
     <dependency>
       <groupId>org.sakaiproject.nakamura</groupId>
       <artifactId>org.sakaiproject.nakamura.user.api</artifactId>
@@ -102,6 +82,10 @@
     <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.commons.json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.commons.osgi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
