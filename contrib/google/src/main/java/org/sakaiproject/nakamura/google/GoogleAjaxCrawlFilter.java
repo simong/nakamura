@@ -81,11 +81,10 @@ public class GoogleAjaxCrawlFilter implements Filter {
   private void runInHeadlessBrowser(ServletRequest request, ServletResponse response)
       throws CrawlerException {
     String url = getUrl(request);
-    String cmd = getCommand(url);
     try {
       // Run the request trough a headless browser.
-      LOGGER.info("Executing {}", cmd);
-      Process p = Runtime.getRuntime().exec(cmd);
+      ProcessBuilder pb = new ProcessBuilder(phantomJSPath, tempPath, url);
+      Process p = pb.start();
 
       // Although it might seem strange to read the output before we wait
       // it's required as doing the other way around may end up in a deadlock.
@@ -128,20 +127,6 @@ public class GoogleAjaxCrawlFilter implements Filter {
       // become a hashbang as well!
       sb.append("#").append(fragment);
     }
-    return sb.toString();
-  }
-
-  /**
-   * @param url
-   *          The URL of the page that should be fetched.
-   * @return The commando that needs to be executed.
-   */
-  protected String getCommand(String url) {
-    StringBuilder sb = new StringBuilder(phantomJSPath);
-    sb.append(" ");
-    sb.append(tempPath);
-    sb.append(" ");
-    sb.append(url);
     return sb.toString();
   }
 

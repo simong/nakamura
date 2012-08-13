@@ -58,19 +58,6 @@ public class GoogleAjaxCrawlFilterTest {
   }
 
   @Test
-  public void testCommand() {
-    String url = "http://localhost:8080/";
-    String cmd = filter.getCommand(url);
-    Assert.assertTrue(cmd.startsWith(phantomjs.getAbsolutePath()));
-    Assert.assertTrue(cmd.endsWith(url));
-
-    url = "/search#q=&refine=background%20subtraction";
-    cmd = filter.getCommand(url);
-    Assert.assertTrue(cmd.startsWith(phantomjs.getAbsolutePath()));
-    Assert.assertTrue(cmd.endsWith(url));
-  }
-
-  @Test
   public void testEmptyUrl() {
     Mockito.when(request.getParameter("_escaped_fragment_")).thenReturn("");
     String url = filter.getUrl(request);
