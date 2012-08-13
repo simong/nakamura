@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 public class GoogleAjaxCrawlFilterTest {
 
@@ -37,7 +38,7 @@ public class GoogleAjaxCrawlFilterTest {
 
   @Before
   public void setUp() {
-    request = Mockito.mock(ServletRequest.class);
+    request = Mockito.mock(HttpServletRequest.class);
     Mockito.when(request.getServerName()).thenReturn("localhost");
     Mockito.when(request.getServerPort()).thenReturn(8080);
 
@@ -61,7 +62,12 @@ public class GoogleAjaxCrawlFilterTest {
     String url = "http://localhost:8080/";
     String cmd = filter.getCommand(url);
     Assert.assertTrue(cmd.startsWith(phantomjs.getAbsolutePath()));
-    Assert.assertTrue(cmd.endsWith(cmd));
+    Assert.assertTrue(cmd.endsWith(url));
+
+    url = "/search#q=&refine=background%20subtraction";
+    cmd = filter.getCommand(url);
+    Assert.assertTrue(cmd.startsWith(phantomjs.getAbsolutePath()));
+    Assert.assertTrue(cmd.endsWith(url));
   }
 
   @Test
@@ -75,7 +81,26 @@ public class GoogleAjaxCrawlFilterTest {
   public void testFragmentsInUrl() {
     Mockito.when(request.getParameter("_escaped_fragment_")).thenReturn("key=value");
     String url = filter.getUrl(request);
-    Assert.assertEquals("http://localhost:8080/#!key=value", url);
+    // TODO: Switch to hashbangs when the UI does.
+    Assert.assertEquals("http://localhost:8080/#key=value", url);
+  }
+
+  @Test
+  public void testBadPhantomjsBianry() {
+    // Nonexecutable binary.
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put(GoogleAjaxCrawlFilter.PHANTOMJS_PATH, phantomjs.getAbsolutePath());
+    phantomjs.setExecutable(false);
+    try {
+      filter.activate(properties);
+      Assert
+          .fail("A bad phantomjs path should throw a runtime exception which cancels the filter's activation.");
+    } catch (RuntimeException e) {
+      // Expected.
+    }
+
+    // Non executable phantomjs.
+    properties.put(GoogleAjaxCrawlFilter.PHANTOMJS_PATH, "nonexisting");
   }
 
 }

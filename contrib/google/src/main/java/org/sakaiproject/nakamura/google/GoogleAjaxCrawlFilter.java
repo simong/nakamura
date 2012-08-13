@@ -11,12 +11,10 @@ import org.sakaiproject.nakamura.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Service(value = Filter.class)
@@ -83,33 +82,26 @@ public class GoogleAjaxCrawlFilter implements Filter {
       throws CrawlerException {
     String url = getUrl(request);
     String cmd = getCommand(url);
-
-    InputStream in = null;
     try {
       // Run the request trough a headless browser.
+      LOGGER.info("Executing {}", cmd);
       Process p = Runtime.getRuntime().exec(cmd);
 
       // Although it might seem strange to read the output before we wait
       // it's required as doing the other way around may end up in a deadlock.
-      // That does mean we can't just write directly to the response outputstream.
-      in = p.getInputStream();
-      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-      String line = reader.readLine();
-      StringBuilder content = new StringBuilder();
-      while (line != null) {
-        content.append(line);
-        line = reader.readLine();
-      }
+      String content = IOUtils.readFully(p.getInputStream(), "UTF-8");
 
+      // Check wether it was succesfull or not.
       int status = p.waitFor();
       if (status == 0) {
         // Success, Send it too the Googlebot.
         HttpServletResponse resp = (HttpServletResponse) response;
         resp.setHeader("Content-Type", "text/html");
         resp.setHeader("Vary", "Accept-Encoding");
-        response.getWriter().write(content.toString());
+        response.getWriter().write(content);
       } else {
-        throw new CrawlerException("Couldn't run phantomjs.");
+        String err = IOUtils.readFully(p.getErrorStream(), "UTF-8");
+        throw new CrawlerException("Couldn't run phantomjs: " + err);
       }
     } catch (IOException e) {
       throw new CrawlerException("Something went wrong when trying to run phantomjs.", e);
@@ -127,14 +119,16 @@ public class GoogleAjaxCrawlFilter implements Filter {
   protected String getUrl(ServletRequest request) {
     String fragment = request.getParameter("_escaped_fragment_");
     StringBuilder sb = new StringBuilder("http://");
-    sb.append(request.getServerName()).append(":").append(request.getServerPort())
-        .append("/");
+    sb.append(request.getServerName()).append(":");
+    sb.append(request.getServerPort());
+    String pi = ((HttpServletRequest) request).getPathInfo();
+    sb.append((pi == null) ? '/' : pi);
     if (fragment != null && fragment != "") {
-      sb.append("#!").append(fragment);
+      // TODO: Once the UI switches to proper hashbang fragments (#!), this we'll need to
+      // become a hashbang as well!
+      sb.append("#").append(fragment);
     }
-    String url = sb.toString();
-    LOGGER.info(url);
-    return url;
+    return sb.toString();
   }
 
   /**
@@ -143,7 +137,12 @@ public class GoogleAjaxCrawlFilter implements Filter {
    * @return The commando that needs to be executed.
    */
   protected String getCommand(String url) {
-    return phantomJSPath + " " + tempPath + " " + url;
+    StringBuilder sb = new StringBuilder(phantomJSPath);
+    sb.append(" ");
+    sb.append(tempPath);
+    sb.append(" ");
+    sb.append(url);
+    return sb.toString();
   }
 
   /**
@@ -172,7 +171,7 @@ public class GoogleAjaxCrawlFilter implements Filter {
     InputStream in = null;
     OutputStream os = null;
     try {
-      File f = File.createTempFile("content", "js");
+      File f = File.createTempFile("content", ".js");
       in = getClass().getResourceAsStream("/content.js");
 
       os = new FileOutputStream(f);
@@ -182,9 +181,7 @@ public class GoogleAjaxCrawlFilter implements Filter {
 
     } catch (IOException e) {
       LOGGER.error("Couldn't copy content.js!", e);
-
       throw new RuntimeException("Can't copy the content.js file. Not activating.");
-
     } finally {
       try {
         in.close();
@@ -203,22 +200,24 @@ public class GoogleAjaxCrawlFilter implements Filter {
   public void modify(Map<String, Object> properties) {
     phantomJSPath = properties.get(PHANTOMJS_PATH).toString();
 
-    // Check in the PATH environment variable first.
+    // Check the direct path.
+    File f = new File(phantomJSPath);
+    if (f.exists() && !f.canExecute()) {
+      throw new RuntimeException(
+          "Found the PhantomJS binary (directly), but it isn't marked as executable.");
+    }
+
+    // Check in the PATH environment variable.
     String syspath = System.getenv("PATH");
     String[] dirs = StringUtils.split(syspath, File.pathSeparatorChar);
     for (String dir : dirs) {
       File file = new File(dir, phantomJSPath);
-      if (file.isFile() && file.canExecute()) {
+      if (f.exists() && !f.canExecute()) {
+        throw new RuntimeException(
+            "Found the PhantomJS binary (in the PATH), but it isn't marked as executable.");
+      } else if (file.isFile() && file.canExecute()) {
         return;
       }
-    }
-
-    // Couldn't find it in the PATH, try an absolute path approach.
-    File f = new File(phantomJSPath);
-    if (!f.exists() || (f.exists() && !f.canExecute())) {
-      throw new RuntimeException(
-          "Couldn't find the phantomJS binary in the PATH or at the provided path: "
-              + phantomJSPath);
     }
   }
 }

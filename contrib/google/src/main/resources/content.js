@@ -11,10 +11,7 @@ else {
     	if (status === "success") {
 	        // Retrieves all the html in the page and write it to standard out.
 	        var check = function() {
-	            var content = page.evaluate(function () {
-	                return $("html").html();
-	            });
-	            console.log("<html>" + content + "</html>");
+	            console.log(page.content);
 	
 	            // No need to keep running in interactive mode.
 	            phantom.exit();
