@@ -273,13 +273,13 @@ public class LdapAuthenticationPlugin implements AuthenticationPlugin {
               System.currentTimeMillis() - timeStart);
 
           // provision & decorate the user
-          Session session = repository.loginAdministrative();
-          Authorizable authorizable = getJcrUser(session, sc.getUserID());
-
-          if (authorizable != null && attrsProps != null) {
-            log.debug("Decorating user [{}] with props from {}", userDn, USER_PROPS);
-            decorateUser(session, authorizable, conn);
+          Map<String, Object[]> properties = new HashMap<String, Object[]>();
+          if (attrsProps != null && attrsProps.size() != 0) {
+            getLDAPUserAttributes(sc.getUserID(), conn, properties);
           }
+          Session session = repository.loginAdministrative();
+          createLocalUser(session, sc.getUserID(), properties);
+
           // if we made it this far, we can exit the retry loop
           didLdapSucceed = true;
           break;
@@ -307,7 +307,7 @@ public class LdapAuthenticationPlugin implements AuthenticationPlugin {
     log.debug("Bound as application user");
   }
 
-  private Authorizable getJcrUser(Session session, String userId) throws Exception {
+  private Authorizable createLocalUser(Session session, String userId, Map<String, Object[]> properties) throws Exception {
 	AuthorizableManager am = session.getAuthorizableManager(); 
     Authorizable auth = am.findAuthorizable(userId);
     if (auth == null && createAccount) {
@@ -315,7 +315,7 @@ public class LdapAuthenticationPlugin implements AuthenticationPlugin {
       boolean created = am.createUser(userId, userId, password, null);
       if (created) {
     	  auth = am.findAuthorizable(userId);
-    	  authorizablePostProcessService.process(auth, session, ModificationType.CREATE, null);
+    	  authorizablePostProcessService.process(auth, session, ModificationType.CREATE, properties);
       }
       else {
     	  throw new Exception("Unable to create User for " + userId);
@@ -325,18 +325,23 @@ public class LdapAuthenticationPlugin implements AuthenticationPlugin {
   }
 
   /**
-   * Decorate the user with extra information.
+   * Gets the attributes out of an LDAP User Object.
    * 
-   * @param session
    * @param user
- * @throws StorageClientException 
- * @throws AccessDeniedException 
+   *          A userID that can be used to retrieve the LDAP object that represents this
+   *          user ID.
+   * @param conn
+   *          An LDAP Connection
+   * @param properties
+   *          A map that can be used to store properties in.
+   * @throws LDAPException
+   * @throws AccessDeniedException
+   * @throws StorageClientException
    */
-  private void decorateUser(Session session, Authorizable user, LDAPConnection conn)
+  private void getLDAPUserAttributes(String user, LDAPConnection conn, Map<String, Object[]> properties)
       throws LDAPException, AccessDeniedException, StorageClientException {
     // fix up the user dn to search
-    String userDn = LdapUtil
-        .escapeLDAPSearchFilter(userFilter.replace("{}", user.getId()));
+    String userDn = LdapUtil.escapeLDAPSearchFilter(userFilter.replace("{}", user));
 
     // get a connection to LDAP
     String[] ldapAttrNames = attrsProps.keySet().toArray(new String[attrsProps.size()]);
@@ -346,14 +351,13 @@ public class LdapAuthenticationPlugin implements AuthenticationPlugin {
       LDAPEntry entry = results.next();
 
       for (String ldapAttrName : ldapAttrNames) {
-        String jcrPropName = attrsProps.get(ldapAttrName);
+        String key = attrsProps.get(ldapAttrName);
 
         LDAPAttribute attr = entry.getAttribute(ldapAttrName);
         if (attr != null) {
-          user.setProperty(jcrPropName, attr.getStringValue());
+          properties.put(key, new String[] { attr.getStringValue() });
         }
       }
-      session.getAuthorizableManager().updateAuthorizable(user);
     } else {
       log.warn("Can't find user [" + userDn + "]");
     }

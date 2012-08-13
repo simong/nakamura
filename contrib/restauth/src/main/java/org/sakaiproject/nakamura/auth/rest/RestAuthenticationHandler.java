@@ -55,6 +55,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Principal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -413,7 +414,7 @@ public class RestAuthenticationHandler implements AuthenticationHandler,
       User user = (User) authMgr.findAuthorizable(principalName);
 
       if (authzPostProcessService != null) {
-        authzPostProcessService.process(user, session, ModificationType.CREATE, null);
+        authzPostProcessService.process(user, session, ModificationType.CREATE, new HashMap<String, Object[]>());
       }
       return user;
     }

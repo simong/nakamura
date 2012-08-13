@@ -444,13 +444,8 @@ public class LdapAuthenticationPluginTest {
     assertTrue(ldapAuthenticationPlugin.canDecorateUser());
 
     verify(entry).getAttribute("givenName");
-    verify(user).setProperty(eq("firstName"), isA(String.class));
-
     verify(entry).getAttribute("sn");
-    verify(user).setProperty(eq("lastName"), isA(String.class));
-
     verify(entry).getAttribute("mail");
-    verify(user).setProperty(eq("email"), isA(String.class));
   }
 
   @Test
@@ -493,13 +488,8 @@ public class LdapAuthenticationPluginTest {
     assertTrue(ldapAuthenticationPlugin.canDecorateUser());
 
     verify(entry).getAttribute("givenName");
-    verify(user).setProperty(eq("firstName"), isA(String.class));
-
     verify(entry).getAttribute("sn");
-    verify(user).setProperty(eq("lastName"), isA(String.class));
-
     verify(entry).getAttribute("mail");
-    verify(user).setProperty(eq("email"), isA(String.class));
   }
 
   @Test
@@ -543,13 +533,8 @@ public class LdapAuthenticationPluginTest {
     assertTrue(ldapAuthenticationPlugin.canDecorateUser());
 
     verify(entry).getAttribute("givenName");
-    verify(user).setProperty(eq("firstName"), isA(String.class));
-
     verify(entry).getAttribute("sn");
-    verify(user).setProperty(eq("lastName"), isA(String.class));
-
     verify(entry).getAttribute("mail");
-    verify(user).setProperty(eq("email"), isA(String.class));
   }
 
   @Test

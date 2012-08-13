@@ -30,7 +30,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.auth.Authenticator;
 import org.apache.sling.auth.core.spi.AuthenticationFeedbackHandler;
 import org.apache.sling.auth.core.spi.AuthenticationHandler;
 import org.apache.sling.auth.core.spi.AuthenticationInfo;
@@ -101,6 +100,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -532,12 +532,13 @@ public class SamlAuthenticationHandler implements AuthenticationHandler,
         RandomStringUtils.random(32), null)) {
       LOGGER.info("User {} created", authnInfo.getUser());
       User user = (User) authMgr.findAuthorizable(authnInfo.getUser());
-      user.setProperty("firstName", authnInfo.get("firstname"));
-      user.setProperty("lastName", authnInfo.get("lastname"));
-      user.setProperty("email", authnInfo.get("email"));
+      Map<String, Object[]> props = new HashMap<String, Object[]>();
+      props.put("firstName", new Object[] { authnInfo.get("firstname") });
+      props.put("lastName", new Object[] { authnInfo.get("lastname") });
+      props.put("email", new Object[] { authnInfo.get("email") });
 
       if (authzPostProcessService != null) {
-        authzPostProcessService.process(user, session, ModificationType.CREATE, null);
+        authzPostProcessService.process(user, session, ModificationType.CREATE, props);
       }
 
       if (user.isModified()) {
